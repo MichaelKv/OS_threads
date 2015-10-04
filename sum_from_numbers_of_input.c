@@ -14,6 +14,10 @@ int queue_size(struct queue *q);
 void queue_free(struct queue *q);
 // Queue header end------------------------------------------------------------->
 
+// Parse header start----------------------------------------------------------->
+int* parse(int *out_arr, char *in_str);
+// Parse header end------------------------------------------------------------->
+
 int main() {
 
 }
