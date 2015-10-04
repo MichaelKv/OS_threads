@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#define ROWS_COUNT 3 //The maximum amount of rows in the input file
+
 // Queue header start----------------------------------------------------------->
 struct queue;
 struct queue *queue_create(int maxsize);
@@ -23,6 +25,27 @@ void* read_thread(void *p);
 void* write_thread(void *p);
 void* work_thread(void *p);
 // Threads header end----------------------------------------------------------->
+
+// Parameters of threads start-------------------------------------------------------->
+struct params_for_reader {
+	pthread_mutex_t mutex;
+	pthread_cond_t condvar;
+	struct queue *q;
+	int count;
+};
+
+struct params_for_writer {
+	pthread_mutex_t mutex;
+	pthread_cond_t condvar;
+	int sums[ROWS_COUNT];
+	int i;
+};
+
+struct params_for_workers {
+	struct params_for_reader* params_reader;
+	struct params_for_writer* params_writer;
+};
+// Parameters of threads end---------------------------------------------------------->
 
 int main() {
 
