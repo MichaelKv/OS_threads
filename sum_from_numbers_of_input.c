@@ -87,6 +87,52 @@ int main() {
 	pthread_cond_destroy(&params_reader.condvar);
 }
 
+// Threads implementation start---------------------------------------------------------->
+void* read_thread(void *p) {
+	sleep(1);
+	struct params_for_reader* params = (struct params_for_reader*) p;
+	FILE *file;
+	char str[MAX_LANG], *estr;
+
+	printf("Reader #{%d} => Opening file\n", (int)pthread_self());
+   	file = fopen ("input.txt","r");
+	if (file == NULL) {
+		printf("Reader #{%d} => Error\n", (int)pthread_self());
+	} else 
+		printf("Reader #{%d} => Done\n", (int)pthread_self());
+
+	while(1) {
+		struct timespec tw = {0,300000000};
+		struct timespec tr;
+		nanosleep (&tw, &tr);
+
+		estr = fgets (str, sizeof(str), file);
+		pthread_mutex_lock(&params->mutex);
+
+		if (estr != NULL) {
+			printf("Reader #{%d} => I have read next string: %s", (int)pthread_self(), str);
+
+			params->count++;
+			queue_enqueue(params->q, str);
+			for (int i = 0; i < WORKERS_COUNT; i++)
+				pthread_cond_signal(&params->condvar);
+
+			pthread_mutex_unlock(&params->mutex);
+		} else {
+			if (feof(file) != 0) {
+				printf("Reader #{%d} => Reading is complete\n", (int)pthread_self());
+				pthread_mutex_unlock(&params->mutex);
+				break;
+			} else {
+				printf("Reader #{%d} => Error reading the file\n", (int)pthread_self());
+				pthread_mutex_unlock(&params->mutex);
+				break;
+			}
+		}
+ 	}
+}
+// Threads implementation end------------------------------------------------------------>
+
 /*
 	Queue implementation start----------------------------------------------------------->
 */
