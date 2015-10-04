@@ -131,6 +131,35 @@ void* read_thread(void *p) {
 		}
  	}
 }
+
+void* write_thread(void *p) {
+	struct params_for_writer* params = (struct params_for_writer*) p;
+	pthread_mutex_lock(&params->mutex);
+	printf("  Writer #{%d} => I'm wait ...\n", (int)pthread_self());
+	// while(1) {
+		pthread_cond_wait(&params->condvar, &params->mutex);
+
+		int total_sum = 0;
+
+		printf("  Writer #{%d} => I have next sums: ", (int)pthread_self());
+
+		for (int i = 0; i < params->i; i++) {
+			printf("%d ", params->sums[i]);
+		}
+
+		for (int i = 0; i < params->i; i++) {
+			total_sum += params->sums[i];
+		}
+		pthread_mutex_unlock(&params->mutex);
+
+		printf("\n  Writer #{%d} => Total sum: %d\n", (int)pthread_self(), total_sum);
+	// }
+	FILE *file;
+	file = fopen("output.txt","w");
+	fprintf(file, "Total sum is %d\n", total_sum);
+	fclose(file);
+	printf("  Writer #{%d} => Total sum saved in output.txt\n", (int)pthread_self());
+}
 // Threads implementation end------------------------------------------------------------>
 
 /*
