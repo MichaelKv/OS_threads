@@ -18,6 +18,12 @@ void queue_free(struct queue *q);
 int* parse(int *out_arr, char *in_str);
 // Parse header end------------------------------------------------------------->
 
+// Threads header start--------------------------------------------------------->
+void* read_thread(void *p);
+void* write_thread(void *p);
+void* work_thread(void *p);
+// Threads header end----------------------------------------------------------->
+
 int main() {
 
 }
