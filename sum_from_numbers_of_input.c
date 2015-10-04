@@ -160,6 +160,44 @@ void* write_thread(void *p) {
 	fclose(file);
 	printf("  Writer #{%d} => Total sum saved in output.txt\n", (int)pthread_self());
 }
+
+void* work_thread(void *p) {
+	struct params_for_workers* params = (struct params_for_workers*) p;
+	
+	pthread_mutex_lock(&params->params_reader->mutex);
+	pthread_cond_wait(&params->params_reader->condvar, &params->params_reader->mutex);
+	printf("\tWorker #{%d} => I'm wake up\n", (int)pthread_self());
+	pthread_mutex_unlock(&params->params_reader->mutex);
+
+	while(1) {
+		pthread_mutex_lock(&params->params_reader->mutex);
+		if (queue_size(params->params_reader->q)) {
+
+			int arr[MAX_COUNT_OF_NUMBERS], sum = 0;
+			parse(arr, queue_dequeue(params->params_reader->q));
+
+			pthread_mutex_unlock(&params->params_reader->mutex);
+
+			for (int i = 0; i < MAX_COUNT_OF_NUMBERS; i++)
+				sum += arr[i];
+
+			printf("\tWorker #{%d} => Sum: %d\n", (int)pthread_self(), sum);
+
+			pthread_mutex_lock(&params->params_writer->mutex);
+
+			params->params_writer->sums[params->params_writer->i] = sum;
+			params->params_writer->i++;
+			
+			// pthread_cond_signal(&params->params_writer->condvar);
+			if (params->params_reader->count == ROWS_COUNT) {
+				pthread_cond_signal(&params->params_writer->condvar);
+			}
+
+			pthread_mutex_unlock(&params->params_writer->mutex);
+		} else
+			pthread_mutex_unlock(&params->params_reader->mutex);
+	}
+}
 // Threads implementation end------------------------------------------------------------>
 
 /*
