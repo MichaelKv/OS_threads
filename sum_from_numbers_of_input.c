@@ -54,7 +54,37 @@ struct params_for_workers {
 // Parameters of threads end---------------------------------------------------------->
 
 int main() {
+	struct params_for_reader params_reader;
+	pthread_mutex_init(&params_reader.mutex, NULL);
+  	pthread_cond_init(&params_reader.condvar, NULL); 
+  	params_reader.q = queue_create(ROWS_COUNT);
+  	params_reader.count = 0;
 
+	struct params_for_writer params_writer;
+	pthread_mutex_init(&params_writer.mutex, NULL);
+  	pthread_cond_init(&params_writer.condvar, NULL);
+
+  	struct params_for_workers params_workers;
+  	params_workers.params_writer = &params_writer;
+  	params_workers.params_reader = &params_reader;
+
+  	pthread_t reader, writer;
+  	pthread_t workers[WORKERS_COUNT];
+
+  	pthread_create(&reader, NULL, read_thread, &params_reader);
+	pthread_create(&writer, NULL, write_thread, &params_writer);
+
+	for (int i = 0; i < WORKERS_COUNT; i++) {
+		 pthread_create(&workers[i], NULL, work_thread, &params_workers);
+	}
+
+	pthread_join(reader, NULL);
+ 	pthread_join(writer, NULL);
+
+	pthread_mutex_destroy(&params_writer.mutex);
+	pthread_cond_destroy(&params_writer.condvar);
+	pthread_mutex_destroy(&params_reader.mutex);
+	pthread_cond_destroy(&params_reader.condvar);
 }
 
 /*
