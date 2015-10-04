@@ -89,3 +89,28 @@ char* queue_dequeue(struct queue *q) {
 /*
 	Queue implementation end------------------------------------------------------------->
 */
+
+/*
+	Parse implementation start----------------------------------------------------------->
+*/
+int* parse(int *out_arr, char *in_str) {
+	int index = 0, out_index = 0;
+	while(*(in_str + index) != '\0') {
+		if (isdigit(*(in_str + index)) || *(in_str + index) == '-') {
+			char *digit_buf = (char*)malloc(sizeof(char) * (MAX_COUNT_OF_DIGITS + 2));//One char for '\0' & one char for minus
+			int i = 0;
+			while(isdigit(*(in_str + index)) || *(in_str + index) == '-') {
+			    *(digit_buf + i) = *(in_str + index);
+			    index++;
+			    i++;
+			}
+			*(out_arr + out_index) = atoi(digit_buf);
+			out_index++;
+		}
+		index++;
+	}
+	return out_arr;
+}
+/*
+	Parse implementation end------------------------------------------------------------->
+*/
