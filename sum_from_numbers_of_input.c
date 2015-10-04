@@ -5,7 +5,13 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#define MAX_LANG 20 //The maximum size of the input lines
 #define ROWS_COUNT 3 //The maximum amount of rows in the input file
+
+#define MAX_COUNT_OF_NUMBERS 4 //The maximum amount of numbers in a row
+#define MAX_COUNT_OF_DIGITS 5 //The maximum amount of digits in the input numbers
+
+#define WORKERS_COUNT 5// The maximum amount threads of worker
 
 // Queue header start----------------------------------------------------------->
 struct queue;
